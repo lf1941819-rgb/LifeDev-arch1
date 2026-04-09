@@ -54,7 +54,11 @@ export function LoginPage() {
               <label className="text-xs font-bold uppercase text-zinc-500 flex items-center gap-2">
                 <Mail className="w-3 h-3" /> E-mail
               </label>
-              <Input {...register('email')} type="email" placeholder="admin@lifedevtech.com.br" />
+              <Input
+  {...register('email')}
+  type="email"
+  placeholder="Digite seu e-mail"
+/>
               {errors.email && <p className="text-red-500 text-[10px] font-bold">{errors.email.message}</p>}
             </div>
 
