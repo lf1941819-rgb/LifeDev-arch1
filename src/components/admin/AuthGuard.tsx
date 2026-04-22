@@ -9,9 +9,31 @@ export function AuthGuard() {
 
   useEffect(() => {
     async function checkAuth() {
-      const { data } = await authService.getSession();
-      setAuthenticated(!!data.session);
-      setLoading(false);
+      try {
+        const { data: { session } } = await authService.getSession();
+        
+        if (!session) {
+          setAuthenticated(false);
+          setLoading(false);
+          return;
+        }
+
+        // Validate Profile
+        const { data: profile, error } = await authService.getProfile(session.user.id);
+        
+        if (error || !profile || profile.role !== 'admin' || !profile.is_active) {
+          console.error('Unauthorized access attempt:', error || 'Invalid role or inactive account');
+          await authService.signOut();
+          setAuthenticated(false);
+        } else {
+          setAuthenticated(true);
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+        setAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
     }
     checkAuth();
   }, []);

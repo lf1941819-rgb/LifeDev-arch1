@@ -3,8 +3,19 @@ import { motion } from 'motion/react';
 import { ArrowRight, MessageSquare, ShieldCheck, Zap } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { COMPANY_INFO } from '@/src/constants';
+import { useSiteSettings } from '@/src/hooks/useSiteSettings';
 
 export function Hero() {
+  const { settings, loading } = useSiteSettings();
+
+  const headline = settings?.hero_headline || "Sua empresa com a presença digital que ela merece.";
+  const subheadline = settings?.hero_subheadline || "Desenvolvemos sites e sistemas de alto padrão que transmitem confiança imediata e convertem visitantes em clientes para o seu negócio.";
+  const ctaPrimary = settings?.cta_primary_text || "Falar com Especialista";
+  const ctaSecondary = settings?.cta_secondary_text || "Ver Nossas Soluções";
+  const whatsappLink = settings?.main_whatsapp 
+    ? `https://wa.me/${settings.main_whatsapp.replace(/\D/g, '')}` 
+    : COMPANY_INFO.whatsappLink;
+
   return (
     <section id="hero" className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       {/* Background Elements */}
@@ -24,25 +35,24 @@ export function Hero() {
             <span>Presença Digital de Alto Padrão</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold text-zinc-950 leading-[1.1] mb-6 text-balance">
-            Sua empresa com a presença digital que ela <span className="text-primary">merece</span>.
-          </h1>
+          <h1 className="text-5xl md:text-7xl font-bold text-zinc-950 leading-[1.1] mb-6 text-balance"
+            dangerouslySetInnerHTML={{ __html: headline.replace('merece', '<span class="text-primary">merece</span>') }}
+          />
           
           <p className="text-lg md:text-xl text-zinc-600 mb-8 max-w-xl leading-relaxed">
-            Desenvolvemos sites e sistemas de alto padrão que transmitem confiança imediata e 
-            convertem visitantes em clientes para o seu negócio.
+            {subheadline}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4">
             <Button asChild size="lg" className="rounded-full px-8 h-14 text-lg">
-              <a href={COMPANY_INFO.whatsappLink} target="_blank" rel="noreferrer">
-                Falar com Especialista
+              <a href={whatsappLink} target="_blank" rel="noreferrer">
+                {ctaPrimary}
                 <MessageSquare className="ml-2 w-5 h-5" />
               </a>
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-full px-8 h-14 text-lg">
               <a href="#services">
-                Ver Nossas Soluções
+                {ctaSecondary}
                 <ArrowRight className="ml-2 w-5 h-5" />
               </a>
             </Button>

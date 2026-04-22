@@ -13,10 +13,12 @@ const settingsSchema = z.object({
   company_display_name: z.string().min(2),
   main_whatsapp: z.string(),
   main_email: z.string().email(),
-  instagram: z.string(),
+  instagram_url: z.string().optional(),
   hero_headline: z.string(),
   hero_subheadline: z.string(),
-  about_text_short: z.string(),
+  cta_primary_text: z.string(),
+  cta_secondary_text: z.string(),
+  about_text_short: z.string().optional(),
 });
 
 type SettingsFormData = z.infer<typeof settingsSchema>;
@@ -24,7 +26,7 @@ type SettingsFormData = z.infer<typeof settingsSchema>;
 export function SiteSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [settingsId, setSettingsId] = useState<string | null>(null);
+  const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
   const { register, handleSubmit, reset } = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
@@ -34,7 +36,6 @@ export function SiteSettings() {
     async function load() {
       const { data } = await getSiteSettings();
       if (data) {
-        setSettingsId(data.id);
         reset(data);
       }
       setLoading(false);
@@ -43,9 +44,15 @@ export function SiteSettings() {
   }, [reset]);
 
   const onSubmit = async (data: SettingsFormData) => {
-    if (!settingsId) return;
     setSaving(true);
-    await updateSiteSettings({ ...data, id: settingsId });
+    setStatus(null);
+    const { error } = await updateSiteSettings(data);
+    if (error) {
+      setStatus({ type: 'error', message: 'Erro ao salvar configurações.' });
+    } else {
+      setStatus({ type: 'success', message: 'Configurações salvas com sucesso!' });
+      setTimeout(() => setStatus(null), 3000);
+    }
     setSaving(false);
   };
 
@@ -91,7 +98,7 @@ export function SiteSettings() {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold uppercase text-zinc-500">Instagram</label>
-                <Input {...register('instagram')} />
+                <Input {...register('instagram_url')} placeholder="https://instagram.com/perfil" />
               </div>
             </div>
           </CardContent>
@@ -101,7 +108,7 @@ export function SiteSettings() {
         <Card className="border-none shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Layout className="w-5 h-5 text-primary" /> Seção Hero
+              <Layout className="w-5 h-5 text-primary" /> Seção Hero & Chamadas
             </CardTitle>
             <CardDescription>O primeiro conteúdo que o usuário vê ao entrar no site.</CardDescription>
           </CardHeader>
@@ -114,8 +121,34 @@ export function SiteSettings() {
               <label className="text-xs font-bold uppercase text-zinc-500">Subheadline (Texto de Apoio)</label>
               <Textarea {...register('hero_subheadline')} />
             </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase text-zinc-500">Texto Botão Primário</label>
+                <Input {...register('cta_primary_text')} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold uppercase text-zinc-500">Texto Botão Secundário</label>
+                <Input {...register('cta_secondary_text')} />
+              </div>
+            </div>
           </CardContent>
         </Card>
+
+        {/* About Short */}
+        <Card className="border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-sm font-bold uppercase text-zinc-500">Texto Institucional Curto</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea {...register('about_text_short')} rows={4} placeholder="Breve resumo sobre a empresa para o rodapé ou seção sobre." />
+          </CardContent>
+        </Card>
+
+        {status && (
+          <div className={`p-4 rounded-lg text-sm font-medium ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+            {status.message}
+          </div>
+        )}
       </div>
     </form>
   );

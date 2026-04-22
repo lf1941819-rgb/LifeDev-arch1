@@ -33,6 +33,11 @@ export const authService = {
     const supabase = getSupabase();
     if (!supabase) return { data: { session: null } };
     return await supabase.auth.getSession();
+  },
+  async getProfile(userId: string) {
+    const supabase = getSupabase();
+    if (!supabase) return { data: null, error: 'Not configured' };
+    return await supabase.from('profiles').select('*').eq('id', userId).single();
   }
 };
 
@@ -77,6 +82,47 @@ export async function deletePortfolioItem(id: string) {
   return await supabase.from('portfolio_items').delete().eq('id', id);
 }
 
+// Posts Services
+export async function getPosts() {
+  const supabase = getSupabase();
+  if (!supabase) return { data: [], error: 'Not configured' };
+  return await supabase.from('content_posts').select('*').order('created_at', { ascending: false });
+}
+
+export async function upsertPost(post: any) {
+  const supabase = getSupabase();
+  if (!supabase) return { error: 'Not configured' };
+  return await supabase.from('content_posts').upsert([post]);
+}
+
+export async function deletePost(id: string) {
+  const supabase = getSupabase();
+  if (!supabase) return { error: 'Not configured' };
+  return await supabase.from('content_posts').delete().eq('id', id);
+}
+
+// Storage Services
+export async function uploadImage(file: File, bucket: string) {
+  const supabase = getSupabase();
+  if (!supabase) return { error: 'Not configured' };
+
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(filePath, file);
+
+  if (error) return { error: error.message };
+
+  const { data: { publicUrl } } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(filePath);
+
+  return { publicUrl };
+}
+
 // Settings Services
 export async function getSiteSettings() {
   const supabase = getSupabase();
@@ -87,7 +133,8 @@ export async function getSiteSettings() {
 export async function updateSiteSettings(settings: any) {
   const supabase = getSupabase();
   if (!supabase) return { error: 'Not configured' };
-  return await supabase.from('site_settings').update(settings).eq('id', settings.id);
+  // settings.id is true in the singleton pattern
+  return await supabase.from('site_settings').upsert({ ...settings, id: true });
 }
 
 // Payment Services

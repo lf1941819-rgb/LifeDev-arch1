@@ -21,6 +21,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { PortfolioManagement } from './pages/admin/PortfolioManagement';
 import { LeadsManagement } from './pages/admin/LeadsManagement';
 import { SiteSettings } from './pages/admin/SiteSettings';
+import { PostsManagement } from './pages/admin/PostsManagement';
 import { PaymentPage } from './pages/PaymentPage';
 
 function PublicSite() {
@@ -55,7 +56,7 @@ export default function App() {
           <Route path="/admin/portfolio" element={<AdminLayout><PortfolioManagement /></AdminLayout>} />
           <Route path="/admin/leads" element={<AdminLayout><LeadsManagement /></AdminLayout>} />
           <Route path="/admin/settings" element={<AdminLayout><SiteSettings /></AdminLayout>} />
-          <Route path="/admin/posts" element={<AdminLayout><div className="p-8 text-center text-zinc-500">Módulo de Postagens em desenvolvimento.</div></AdminLayout>} />
+          <Route path="/admin/posts" element={<AdminLayout><PostsManagement /></AdminLayout>} />
         </Route>
 
         {/* Fallback */}
